@@ -1,0 +1,155 @@
+<div class="card">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap;">
+    <h2 style="color: #333; font-size: 1.8rem; margin-bottom: 10px;">
+      <%= @location_info[:city] %>, <%= @location_info[:state] %>
+    </h2>
+    <% if @from_cache %>
+      <span class="cache-indicator cached">
+        📦 From Cache
+      </span>
+    <% else %>
+      <span class="cache-indicator fresh">
+        🔄 Fresh Data
+      </span>
+    <% end %>
+  </div>
+
+  <p style="color: #666; margin-bottom: 5px;">
+    <strong>Address:</strong> <%= @location_info[:formatted_address] %>
+  </p>
+  <p style="color: #666; margin-bottom: 5px;">
+    <strong>Zip Code:</strong> <%= @location_info[:zip_code] %>
+  </p>
+  <% if @from_cache && @cached_at %>
+    <p style="color: #666; margin-bottom: 5px;">
+      <strong>Data retrieved at:</strong> <%= @cached_at.strftime("%B %d, %Y at %I:%M %p") %>
+    </p>
+  <% end %>
+  
+  <%= link_to "Search Another Address", root_path, 
+      style: "display: inline-block; margin-top: 15px; color: #667eea; text-decoration: none; font-weight: 600;",
+      onmouseover: "this.style.textDecoration='underline'",
+      onmouseout: "this.style.textDecoration='none'" %>
+</div>
+
+<!-- Current Weather -->
+<div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+  <h3 style="margin-bottom: 20px; font-size: 1.5rem;">Current Weather</h3>
+  
+  <div style="display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center;">
+    <div>
+      <div style="font-size: 3.5rem; font-weight: 700; margin-bottom: 10px;">
+        <%= @forecast_data[:current][:temperature_f].round %>°F
+      </div>
+      <div style="font-size: 1.2rem; opacity: 0.9; margin-bottom: 5px;">
+        <%= @forecast_data[:current][:temperature_c].round %>°C
+      </div>
+      <div style="font-size: 1.3rem; margin-top: 10px;">
+        <%= @forecast_data[:current][:condition] %>
+      </div>
+      <div style="font-size: 1rem; opacity: 0.9; margin-top: 5px;">
+        Feels like <%= @forecast_data[:current][:feels_like_f].round %>°F
+      </div>
+    </div>
+    <% if @forecast_data[:current][:condition_icon] %>
+      <img src="https:<%= @forecast_data[:current][:condition_icon] %>" 
+           alt="<%= @forecast_data[:current][:condition] %>"
+           style="width: 100px; height: 100px;">
+    <% end %>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.3);">
+    <div>
+      <div style="opacity: 0.8; font-size: 0.9rem;">Humidity</div>
+      <div style="font-size: 1.3rem; font-weight: 600;"><%= @forecast_data[:current][:humidity] %>%</div>
+    </div>
+    <div>
+      <div style="opacity: 0.8; font-size: 0.9rem;">Wind</div>
+      <div style="font-size: 1.3rem; font-weight: 600;">
+        <%= @forecast_data[:current][:wind_mph].round %> mph <%= @forecast_data[:current][:wind_direction] %>
+      </div>
+    </div>
+    <div>
+      <div style="opacity: 0.8; font-size: 0.9rem;">Pressure</div>
+      <div style="font-size: 1.3rem; font-weight: 600;"><%= @forecast_data[:current][:pressure_in] %> in</div>
+    </div>
+    <div>
+      <div style="opacity: 0.8; font-size: 0.9rem;">UV Index</div>
+      <div style="font-size: 1.3rem; font-weight: 600;"><%= @forecast_data[:current][:uv_index] %></div>
+    </div>
+  </div>
+</div>
+
+<!-- Extended Forecast -->
+<div class="card">
+  <h3 style="margin-bottom: 20px; color: #333; font-size: 1.5rem;">3-Day Forecast</h3>
+  
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+    <% @forecast_data[:forecast].each do |day| %>
+      <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; border: 2px solid #e9ecef;">
+        <div style="font-weight: 600; font-size: 1.1rem; color: #333; margin-bottom: 15px;">
+          <%= Date.parse(day[:date]).strftime("%A, %B %d") %>
+        </div>
+        
+        <div style="text-align: center; margin: 20px 0;">
+          <% if day[:day][:condition_icon] %>
+            <img src="https:<%= day[:day][:condition_icon] %>" 
+                 alt="<%= day[:day][:condition] %>"
+                 style="width: 64px; height: 64px;">
+          <% end %>
+          <div style="color: #666; margin-top: 10px; font-weight: 500;">
+            <%= day[:day][:condition] %>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-around; margin: 15px 0; padding: 15px 0; border-top: 1px solid #dee2e6; border-bottom: 1px solid #dee2e6;">
+          <div style="text-align: center;">
+            <div style="color: #666; font-size: 0.85rem;">High</div>
+            <div style="font-size: 1.5rem; font-weight: 700; color: #dc3545;">
+              <%= day[:day][:max_temp_f].round %>°
+            </div>
+          </div>
+          <div style="text-align: center;">
+            <div style="color: #666; font-size: 0.85rem;">Low</div>
+            <div style="font-size: 1.5rem; font-weight: 700; color: #007bff;">
+              <%= day[:day][:min_temp_f].round %>°
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size: 0.9rem; color: #666;">
+          <div style="margin: 8px 0;">
+            <strong>Rain Chance:</strong> <%= day[:day][:chance_of_rain] %>%
+          </div>
+          <div style="margin: 8px 0;">
+            <strong>Humidity:</strong> <%= day[:day][:avg_humidity] %>%
+          </div>
+          <div style="margin: 8px 0;">
+            <strong>Wind:</strong> <%= day[:day][:max_wind_mph].round %> mph
+          </div>
+        </div>
+
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #dee2e6; font-size: 0.85rem; color: #666;">
+          <div><strong>🌅 Sunrise:</strong> <%= day[:astro][:sunrise] %></div>
+          <div style="margin-top: 5px;"><strong>🌇 Sunset:</strong> <%= day[:astro][:sunset] %></div>
+          <div style="margin-top: 5px;"><strong>🌙 Moon:</strong> <%= day[:astro][:moon_phase] %></div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+  @media (max-width: 768px) {
+    .card > div:first-child {
+      flex-direction: column;
+      align-items: flex-start !important;
+    }
+
+    .cache-indicator {
+      margin-left: 0 !important;
+      margin-top: 10px;
+    }
+  }
+</style>
+
